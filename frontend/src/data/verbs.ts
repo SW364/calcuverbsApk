@@ -24,9 +24,33 @@ export const AUXILIARIES: Auxiliary[] = [
   { label: "Will", neg: "will not" },
 ];
 
-export const VERBS: string[] = [
-  "cut", "run", "eat", "go", "play", "read", "write",
-  "sing", "swim", "jump", "work", "study", "dance", "cook", "drive",
+// Module M1.A verb pool (159 verbs), split for the list UI.
+// Regular/irregular is only for organizing the list — M1.A sentences use
+// the base form after a modal auxiliary, so grammar is unaffected.
+export const REGULAR_VERBS: string[] = [
+  "add", "answer", "apologise", "arrest", "arrive", "ask", "attack",
+  "believe", "boil", "book", "borrow", "carry", "change", "chop", "clean",
+  "climb", "collect", "compose", "cook", "copy", "dance", "describe",
+  "destroy", "die", "discover", "discuss", "dream", "dye", "enjoy",
+  "explode", "extinguish", "fry", "happen", "hate", "help", "hire", "hope",
+  "hunt", "imagine", "invent", "invite", "jump", "kill", "lift", "like",
+  "listen", "live", "look", "love", "miss", "offer", "open", "pack", "pass",
+  "peel", "phone", "plan", "play", "pour", "prefer", "prepare", "push",
+  "rain", "reduce", "remember", "rent", "rescue", "return", "save", "scream",
+  "search", "skate", "sky", "smell", "snore", "start", "stay", "stop",
+  "study", "survive", "talk", "thank", "touch", "try", "use", "visit",
+  "wait", "walk", "want", "warn", "wash", "watch", "work",
+];
+
+export const IRREGULAR_VERBS: string[] = [
+  "be", "become", "begin", "break", "bring", "build", "buy", "catch", "come",
+  "cut", "do", "draw", "drink", "drive", "eat", "fall", "feed", "feel",
+  "fight", "find", "fly", "forget", "freeze", "give", "go", "grow", "have",
+  "hear", "hurt", "keep", "know", "lay", "leave", "lend", "lie", "lose",
+  "make", "meet", "pay", "put", "read", "ring", "run", "say", "see", "sell",
+  "send", "shine", "shoot", "shut", "sing", "sit", "sleep", "speak", "spend",
+  "steal", "swim", "take", "teach", "tell", "think", "throw", "understand",
+  "wear", "win", "write",
 ];
 
 export type Sentence = {

@@ -5,6 +5,9 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
+  Modal,
+  TextInput,
+  FlatList,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -19,22 +22,20 @@ import DragCarousel from "@/src/components/DragCarousel";
 import {
   SUBJECTS,
   AUXILIARIES,
-  VERBS,
+  REGULAR_VERBS,
+  IRREGULAR_VERBS,
   buildSentences,
   Sentence,
 } from "@/src/data/verbs";
 
 const BACKEND = process.env.EXPO_PUBLIC_BACKEND_URL;
 
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 function Pill({ label, active }: { label: string; active: boolean }) {
   return (
-    <View
-      style={[
-        styles.pill,
-        active ? styles.pillActive : styles.pillIdle,
-      ]}
-    >
-      <Text style={[styles.pillText, active && { color: colors.ink }]} numberOfLines={1}>
+    <View style={styles.pill}>
+      <Text style={[styles.pillText, active && styles.pillTextActive]} numberOfLines={1}>
         {label}
       </Text>
     </View>
@@ -66,7 +67,10 @@ export default function M1A() {
 
   const [subj, setSubj] = useState(0);
   const [aux, setAux] = useState(0);
-  const [verb, setVerb] = useState(0);
+  const [verb, setVerb] = useState<string>("cut");
+  const [verbModal, setVerbModal] = useState(false);
+  const [verbTab, setVerbTab] = useState<"regular" | "irregular">("regular");
+  const [search, setSearch] = useState("");
   const [cards, setCards] = useState<ReturnType<typeof buildSentences> | null>(null);
 
   const player = useAudioPlayer(null);
@@ -77,7 +81,7 @@ export default function M1A() {
 
   // Start with "I can cut." generated.
   useEffect(() => {
-    setCards(buildSentences(SUBJECTS[0], AUXILIARIES[0], VERBS[0]));
+    setCards(buildSentences(SUBJECTS[0], AUXILIARIES[0], "cut"));
   }, []);
 
   const tick = useCallback((setter: (i: number) => void) => {
@@ -89,7 +93,7 @@ export default function M1A() {
 
   const generate = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    setCards(buildSentences(SUBJECTS[subj], AUXILIARIES[aux], VERBS[verb]));
+    setCards(buildSentences(SUBJECTS[subj], AUXILIARIES[aux], verb));
   }, [subj, aux, verb]);
 
   const speak = useCallback(
@@ -101,6 +105,10 @@ export default function M1A() {
     },
     [player],
   );
+
+  const base = verbTab === "regular" ? REGULAR_VERBS : IRREGULAR_VERBS;
+  const q = search.trim().toLowerCase();
+  const verbList = q ? base.filter((v) => v.includes(q)) : base;
 
   return (
     <LinearGradient colors={[colors.bgTop, colors.bgBottom]} style={styles.flex}>
@@ -159,19 +167,17 @@ export default function M1A() {
           />
         </View>
 
-        {/* Verb carousel */}
+        {/* Verb selector (opens Regular/Irregular list) */}
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Elige tu verbo</Text>
-          <DragCarousel
-            testID="carousel-verb"
-            data={VERBS}
-            index={verb}
-            onChange={tick(setVerb)}
-            itemWidth={104}
-            itemHeight={52}
-            accent={colors.question}
-            renderItem={(item, active) => <Pill label={item} active={active} />}
-          />
+          <Pressable
+            testID="verb-selector-button"
+            onPress={() => setVerbModal(true)}
+            style={({ pressed }) => [styles.verbButton, pressed && { opacity: 0.85 }]}
+          >
+            <Text style={styles.verbButtonText}>{cap(verb)}</Text>
+            <Ionicons name="chevron-down" size={20} color={colors.question} />
+          </Pressable>
         </View>
 
         {/* Generate button */}
@@ -248,6 +254,79 @@ export default function M1A() {
           </View>
         ) : null}
       </ScrollView>
+
+      {/* Verb list modal (Regular / Irregular tabs) */}
+      <Modal
+        visible={verbModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setVerbModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setVerbModal(false)} />
+          <View style={[styles.sheet, { paddingBottom: insets.bottom + 12 }]}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.tabRow}>
+              <Pressable
+                testID="tab-regular"
+                style={[styles.tab, verbTab === "regular" && styles.tabActive]}
+                onPress={() => setVerbTab("regular")}
+              >
+                <Text style={[styles.tabText, verbTab === "regular" && styles.tabTextActive]}>
+                  Regulares
+                </Text>
+              </Pressable>
+              <Pressable
+                testID="tab-irregular"
+                style={[styles.tab, verbTab === "irregular" && styles.tabActive]}
+                onPress={() => setVerbTab("irregular")}
+              >
+                <Text style={[styles.tabText, verbTab === "irregular" && styles.tabTextActive]}>
+                  Irregulares
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.searchBox}>
+              <Ionicons name="search" size={18} color={colors.inkSoft} />
+              <TextInput
+                testID="verb-search"
+                placeholder="Buscar verbo…"
+                placeholderTextColor={colors.inkSoft}
+                value={search}
+                onChangeText={setSearch}
+                style={styles.searchInput}
+                autoCorrect={false}
+                autoCapitalize="none"
+              />
+            </View>
+            <FlatList
+              data={verbList}
+              keyExtractor={(item) => item}
+              numColumns={3}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              columnWrapperStyle={{ gap: 8 }}
+              contentContainerStyle={{ gap: 8, paddingTop: 12, paddingBottom: 8 }}
+              renderItem={({ item }) => (
+                <Pressable
+                  testID={`verb-option-${item}`}
+                  style={[styles.verbChip, item === verb && styles.verbChipActive]}
+                  onPress={() => {
+                    Haptics.selectionAsync().catch(() => {});
+                    setVerb(item);
+                    setVerbModal(false);
+                    setSearch("");
+                  }}
+                >
+                  <Text style={[styles.verbChipText, item === verb && styles.verbChipTextActive]}>
+                    {cap(item)}
+                  </Text>
+                </Pressable>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
@@ -364,17 +443,17 @@ const styles = StyleSheet.create({
   },
   pill: {
     flex: 1,
-    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
   },
-  pillActive: { backgroundColor: "#F4F7FF", borderColor: "transparent" },
-  pillIdle: { backgroundColor: "#F4F5F9", borderColor: "transparent" },
   pillText: {
     fontFamily: fonts.bold,
-    fontSize: 16,
+    fontSize: 18,
     color: colors.inkSoft,
+  },
+  pillTextActive: {
+    color: colors.ink,
+    fontFamily: fonts.extrabold,
   },
   generateBtn: {
     flexDirection: "row",
@@ -466,5 +545,108 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: spacing.md,
     alignSelf: "center",
+  },
+  verbButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginHorizontal: spacing.md,
+    backgroundColor: colors.questionBg,
+    borderRadius: radius.md,
+    paddingVertical: 12,
+  },
+  verbButtonText: {
+    fontFamily: fonts.extrabold,
+    fontSize: 20,
+    color: colors.question,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(20,22,40,0.4)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    height: "82%",
+    backgroundColor: colors.card,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    paddingTop: 10,
+  },
+  sheetHandle: {
+    width: 44,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: colors.border,
+    alignSelf: "center",
+    marginBottom: spacing.md,
+  },
+  tabRow: {
+    flexDirection: "row",
+    backgroundColor: "#F1F3F9",
+    borderRadius: radius.md,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: radius.sm,
+    alignItems: "center",
+  },
+  tabActive: {
+    backgroundColor: colors.card,
+    shadowColor: "#8A90A6",
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  tabText: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: colors.inkSoft,
+  },
+  tabTextActive: {
+    color: colors.ink,
+    fontFamily: fonts.extrabold,
+  },
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#F5F6FA",
+    borderRadius: radius.md,
+    paddingHorizontal: 12,
+    height: 44,
+    marginTop: spacing.md,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: fonts.semibold,
+    fontSize: 15,
+    color: colors.ink,
+    paddingVertical: 0,
+  },
+  verbChip: {
+    flex: 1,
+    minHeight: 46,
+    borderRadius: radius.md,
+    backgroundColor: "#F5F6FA",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  verbChipActive: {
+    backgroundColor: colors.question,
+  },
+  verbChipText: {
+    fontFamily: fonts.bold,
+    fontSize: 14,
+    color: colors.ink,
+  },
+  verbChipTextActive: {
+    color: "#fff",
+    fontFamily: fonts.extrabold,
   },
 });
