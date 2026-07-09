@@ -27,12 +27,12 @@ type Module = {
 
 const MODULES: Module[] = [
   { code: "M1.A", title: "Verbos Básicos I", icon: "book", color: "#4A7DF0", bg: "#E8F1FC", route: "/m1a" },
-  { code: "M1.B", title: "Verbos Básicos II", icon: "chatbubble-ellipses", color: "#1FB6A6", bg: "#E4F6F3" },
-  { code: "M2.A", title: "Verbos Irregulares I", icon: "create", color: "#F5A623", bg: "#FDF3E1" },
-  { code: "M2.B", title: "Verbos Irregulares II", icon: "flash", color: "#F0654A", bg: "#FDECE8" },
-  { code: "M3.A", title: "Auxiliares I", icon: "star", color: "#8B5CF6", bg: "#F0EAFB" },
+  { code: "M1.B", title: "Gerundio (be + -ing)", icon: "chatbubble-ellipses", color: "#1FB6A6", bg: "#E4F6F3", route: "/m1b" },
+  { code: "M2.A", title: "Tiempos verbales", icon: "create", color: "#F5A623", bg: "#FDF3E1", route: "/m2a" },
+  { code: "M2.B", title: "Tiempos continuos", icon: "flash", color: "#F0654A", bg: "#FDECE8", route: "/m2b" },
+  { code: "M3.A", title: "Verbos regulares", icon: "star", color: "#8B5CF6", bg: "#F0EAFB", route: "/m3a" },
   { code: "M3.B", title: "Auxiliares II", icon: "shield-checkmark", color: "#EC4899", bg: "#FCE7F1", badge: "Nuevo" },
-  { code: "M4.A", title: "Frases y Preguntas I", icon: "flag", color: "#22B573", bg: "#E7F8EF" },
+  { code: "M4.A", title: "Verbos irregulares", icon: "flag", color: "#22B573", bg: "#E7F8EF", route: "/m4a" },
   { code: "M4.B", title: "Frases y Preguntas II", icon: "trophy", color: "#3B82F6", bg: "#E7F0FD", badge: "Nuevo" },
 ];
 

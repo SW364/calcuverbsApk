@@ -30,4 +30,15 @@ Estudiante hispanohablante aprendiendo estructura de frases en inglés con verbo
 - P2: Listas de verbos/sujetos personalizables por el usuario.
 
 ## Next Tasks
-- Recibir del usuario las listas específicas de sujeto/auxiliar/verbo y sustituir los defaults.
+- M3.B y M4.B (pendientes por definir con el usuario).
+
+## Implemented (2026-06 · fase 2)
+- Motor de conjugación `src/data/conjugation.ts` (3ª persona -s/-es/-ies, pasados regulares con doblado CVC, gerundios con reglas de spelling, mapa de irregulares, verbo "be" especial). Verificado con test Node contra todos los ejemplos del usuario.
+- Componente reutilizable `PracticeScreen` (sujeto + selector [auxiliar/tiempo] + botón de verbo con lista/buscador + Generar + cards con TTS). M1.A refactorizado a este componente.
+- Módulos añadidos y enrutados desde el menú:
+  - M1.B `/m1b`: gerundio con auxiliar modal + "be" + verbo-ing (159 verbos, lista directa). Ej: "I can be adding."
+  - M2.A `/m2a`: 4 tiempos (no continuos), 30 verbos invariables (gemini-code). Ej: "I hit / I do not hit / Do I hit?".
+  - M2.B `/m2b`: 4 tiempos continuos, 159 verbos. Ej: "I am adding / I have been adding".
+  - M3.A `/m3a`: 4 tiempos, 58 verbos regulares (lista_verbos_directa).
+  - M4.A `/m4a`: 4 tiempos, 42 verbos irregulares con formas explícitas (lista_verbos_segundo). Ej: "I have awoken".
+- M3.B y M4.B siguen como "Próximamente" (según instrucción del usuario).

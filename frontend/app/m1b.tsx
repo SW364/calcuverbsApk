@@ -1,20 +1,19 @@
 import PracticeScreen from "@/src/components/PracticeScreen";
-import { REGULAR_VERBS, IRREGULAR_VERBS } from "@/src/data/verbs";
-import { AUX_OPTIONS, buildM1A } from "@/src/data/conjugation";
+import { AUX_OPTIONS, buildM1B, M1A_VERBS } from "@/src/data/conjugation";
 import { colors } from "@/src/theme";
 
-export default function M1A() {
+export default function M1B() {
   return (
     <PracticeScreen
       moduleLabel="MÓDULO 1"
-      title="Verbos Básicos"
+      title="Gerundio (be + -ing)"
       optionTitle="Elige tu verbo auxiliar"
       options={AUX_OPTIONS}
       optionItemWidth={94}
       optionAccent={colors.affirmative}
-      divided={{ regular: REGULAR_VERBS, irregular: IRREGULAR_VERBS }}
-      defaultVerb="cut"
-      build={buildM1A}
+      verbs={M1A_VERBS}
+      defaultVerb="add"
+      build={buildM1B}
     />
   );
 }
