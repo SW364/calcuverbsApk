@@ -76,9 +76,10 @@ export function buildTita(
   objKey: string,
 ): Trio {
   const obj = OBJECTS.find((o) => o.key === objKey)!;
+  const quantity = QUANTITIES.find((q) => q.key === qtyKey)!;
+  const numberWord = quantity.label.toLowerCase(); // one, two, three...
   const singular = qtyKey === 1;
   const color = colorName.toLowerCase();
-  const article = /^[aeiou]/.test(color) ? "an" : "a";
   const noun = singular ? obj.singular : obj.plural;
 
   // be forms + negative word
@@ -92,11 +93,12 @@ export function buildTita(
     negWord = singular ? "no" : "not"; // "There was no ..." / "There were not ..."
   }
 
-  const tail = singular ? ` ${article} ${color} ${noun}` : ` ${color} ${noun}`;
+  // Affirmative & question show the number (one, two, ...). Negative uses no/not.
+  const posTail = ` ${numberWord} ${color} ${noun}`;
 
   return {
-    affirmative: sen("", `There ${be}`, `${tail}.`),
+    affirmative: sen("", `There ${be}`, `${posTail}.`),
     negative: sen("", `There ${be}`, ` ${negWord} ${color} ${noun}.`),
-    question: sen("", `${cap(be)} there`, `${tail}?`),
+    question: sen("", `${cap(be)} there`, `${posTail}?`),
   };
 }
