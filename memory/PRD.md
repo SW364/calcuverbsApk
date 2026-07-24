@@ -30,7 +30,14 @@ Estudiante hispanohablante aprendiendo estructura de frases en inglés con verbo
 - P2: Listas de verbos/sujetos personalizables por el usuario.
 
 ## Next Tasks
-- M3.B y M4.B (pendientes por definir con el usuario).
+- (Todos los módulos definidos hasta ahora están implementados.)
+
+## Implemented (2026-07 · fase 3 · Tita)
+- Renombrados M3.B→**Tita I** (`/tita1`, presente) y M4.B→**Tita II** (`/tita2`, pasado).
+- `src/data/tita.ts` + `src/components/TitaScreen.tsx`: estructuras There is/are (Tita I) y There was/were (Tita II).
+- Selectores: carrusel de **cantidad** (One..Eight, el número NO aparece en la oración, solo define singular/plural), carrusel de **color** (Blue/Green/Yellow/Red/Orange con muestra), y **objeto** vía botón→modal con pestañas de categoría (Fruits/Vegetables/Shapes/Animals/Senses).
+- Reglas: singular→"There is/was a|an ...", plural→"There are/were ..." con pluralización automática (apple→apples, fish→fish, tomato→tomatoes, etc.). Negativos: Tita I "no"; Tita II singular "no", plural "not" (según spec del usuario). Artículo a/an según color (orange→an). Verificado con test Node.
+- NOTA: la categoría "Senses" se modeló con sustantivos base (ear/ears, eye/eyes, hand/hands, nose/noses, mouth/mouths) para que la regla singular/plural funcione (las etiquetas "Two Ears/One Nose" chocaban con el selector de cantidad).
 
 ## Implemented (2026-06 · fase 2)
 - Motor de conjugación `src/data/conjugation.ts` (3ª persona -s/-es/-ies, pasados regulares con doblado CVC, gerundios con reglas de spelling, mapa de irregulares, verbo "be" especial). Verificado con test Node contra todos los ejemplos del usuario.
