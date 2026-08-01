@@ -1,20 +1,8 @@
 import PracticeScreen from "@/src/components/PracticeScreen";
-import { REGULAR_VERBS, IRREGULAR_VERBS } from "@/src/data/verbs";
-import { AUX_OPTIONS, buildM1A } from "@/src/data/conjugation";
-import { colors } from "@/src/theme";
+import { getPracticeConfig } from "@/src/data/modules";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 export default function M1A() {
-  return (
-    <PracticeScreen
-      moduleLabel="MÓDULO 1"
-      title="Verbos Básicos"
-      optionTitle="Elige tu verbo auxiliar"
-      options={AUX_OPTIONS}
-      optionItemWidth={94}
-      optionAccent={colors.affirmative}
-      divided={{ regular: REGULAR_VERBS, irregular: IRREGULAR_VERBS }}
-      defaultVerb="cut"
-      build={buildM1A}
-    />
-  );
+  const { lang } = useLanguage();
+  return <PracticeScreen {...getPracticeConfig("m1a", lang)} />;
 }

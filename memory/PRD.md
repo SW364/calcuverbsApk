@@ -30,7 +30,16 @@ Estudiante hispanohablante aprendiendo estructura de frases en inglés con verbo
 - P2: Listas de verbos/sujetos personalizables por el usuario.
 
 ## Next Tasks
-- (Todos los módulos definidos hasta ahora están implementados.)
+- (Todos los módulos definidos están implementados en inglés y español.)
+
+## Implemented (2026-08 · fase 4 · Bilingüe)
+- **Menú de idioma** (botón ☰ arriba-izq del Home): "Lenguaje para aprender" → Inglés (default) / Español. Estado persistido con storage (`LanguageContext`). Se quitó la estrella superior derecha.
+- Al aprender **Español**, la UI de toda la app se muestra en **inglés** (Modules, Choose your subject, AFFIRMATIVE/NEGATIVE/QUESTION, etc.) y cada módulo genera frases en **español con audio en español** (mismo endpoint TTS).
+- Sujetos ES: Yo, Tú, Él, Ella, Ello, Nosotros, Ellos.
+- **Motor de conjugación español** (`conjugation_es.ts`): regular -ar/-er/-ir (presente, pretérito, participio, gerundio) + cambios ortográficos (-car/-gar/-zar, vocal+-yendo/-yó) + base de datos de irregulares (ser, ir, tener, hacer, decir, poder, poner, querer, venir, ver, dar, saber, salir, traer, dormir, jugar). Modales traducidos: can→poder, could→podría, would→querría, should→debería, may→poder, might→podría, must→deber, will→ir a. Verificado con test Node.
+- Módulos ES: M1.A (modal+infinitivo), M1.B (modal+estar+gerundio), M2.A/M3.A/M4.A (presente/pretérito/pretérito perfecto/pluscuamperfecto), M2.B (continuos con estar), Tita I "Hay" / Tita II "Había" con concordancia de género y número.
+- Arquitectura: `getPracticeConfig(id, lang)` y `TitaScreen` eligen datos EN/ES; `PracticeScreen` recibe strings i18n + subjects.
+- NOTA: en español las listas de verbos de tiempos son sets curados (regulares ~24, irregulares ~16, mixto ~12) con conjugación verificada; se pueden ampliar.
 
 ## Implemented (2026-07 · fase 3 · Tita)
 - Renombrados M3.B→**Tita I** (`/tita1`, presente) y M4.B→**Tita II** (`/tita2`, pasado).

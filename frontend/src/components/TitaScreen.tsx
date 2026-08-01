@@ -18,27 +18,20 @@ import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
 import { colors, fonts, spacing, radius } from "@/src/theme";
 import DragCarousel from "@/src/components/DragCarousel";
 import { Sentence } from "@/src/data/verbs";
-import {
-  QUANTITIES,
-  COLORS,
-  OBJECTS,
-  CATEGORIES,
-  Categoria,
-  buildTita,
-  Trio,
-} from "@/src/data/tita";
+import { Trio } from "@/src/data/conjugation";
+import { QUANTITIES, COLORS, OBJECTS, CATEGORIES, Categoria, buildTita } from "@/src/data/tita";
+import { QUANTITIES_ES, COLORS_ES, OBJECTS_ES, buildTitaEs } from "@/src/data/tita_es";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { STRINGS, uiLangOf, MODULE_TITLES } from "@/src/i18n";
 
 const BACKEND = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-function SentenceText({
-  sentence,
-  color,
-  small,
-}: {
-  sentence: Sentence;
-  color: string;
-  small?: boolean;
-}) {
+type QtyT = { key: number; label: string };
+type ColorT = { name: string; hex: string };
+type ObjT = { key: string; label: string; emoji: string; category: Categoria };
+type BuildT = (t: "present" | "past", q: number, c: string, o: string) => Trio;
+
+function SentenceText({ sentence, color, small }: { sentence: Sentence; color: string; small?: boolean }) {
   return (
     <Text style={small ? styles.sentenceSm : styles.sentence}>
       {sentence.pre}
@@ -61,20 +54,24 @@ function SpeakButton({ onPress, color, bg, testID }: { onPress: () => void; colo
   );
 }
 
-export default function TitaScreen({
-  tense,
-  moduleLabel,
-  title,
-}: {
-  tense: "present" | "past";
-  moduleLabel: string;
-  title: string;
-}) {
+export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { lang } = useLanguage();
+  const es = lang === "es";
+  const t = STRINGS[uiLangOf(lang)];
+
+  const QTY: QtyT[] = es ? QUANTITIES_ES : QUANTITIES;
+  const COLS: ColorT[] = es ? (COLORS_ES as ColorT[]) : COLORS;
+  const OBJS: ObjT[] = es ? (OBJECTS_ES as ObjT[]) : OBJECTS;
+  const build: BuildT = es ? buildTitaEs : buildTita;
+
+  const code = tense === "present" ? "Tita I" : "Tita II";
+  const moduleLabel = tense === "present" ? "TITA I" : "TITA II";
+  const title = MODULE_TITLES[lang][code];
 
   const [qty, setQty] = useState(0);
-  const [color, setColor] = useState(3); // Red
+  const [color, setColor] = useState(3); // Red / Rojo
   const [objKey, setObjKey] = useState("apple");
   const [objModal, setObjModal] = useState(false);
   const [cat, setCat] = useState<Categoria>("Fruits");
@@ -86,10 +83,11 @@ export default function TitaScreen({
     setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
   }, []);
 
+  // Regenerate initial card whenever the learning language changes.
   useEffect(() => {
-    setCards(buildTita(tense, QUANTITIES[0].key, COLORS[3].name, "apple"));
+    setCards(build(tense, QTY[qty].key, COLS[color].name, objKey));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [lang]);
 
   const tick = useCallback((setter: (i: number) => void) => {
     return (i: number) => {
@@ -100,8 +98,8 @@ export default function TitaScreen({
 
   const generate = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    setCards(buildTita(tense, QUANTITIES[qty].key, COLORS[color].name, objKey));
-  }, [tense, qty, color, objKey]);
+    setCards(build(tense, QTY[qty].key, COLS[color].name, objKey));
+  }, [build, tense, QTY, COLS, qty, color, objKey]);
 
   const speak = useCallback(
     (text: string) => {
@@ -113,8 +111,8 @@ export default function TitaScreen({
     [player],
   );
 
-  const selectedObj = OBJECTS.find((o) => o.key === objKey)!;
-  const catObjects = OBJECTS.filter((o) => o.category === cat);
+  const selectedObj = OBJS.find((o) => o.key === objKey)!;
+  const catObjects = OBJS.filter((o) => o.category === cat);
 
   return (
     <LinearGradient colors={[colors.bgTop, colors.bgBottom]} style={styles.flex}>
@@ -140,15 +138,15 @@ export default function TitaScreen({
           </View>
         </View>
 
-        {/* Quantity carousel */}
+        {/* Quantity */}
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Elige la cantidad</Text>
+          <Text style={styles.panelTitle}>{t.chooseQty}</Text>
           <DragCarousel
             testID="carousel-quantity"
-            data={QUANTITIES}
+            data={QTY}
             index={qty}
             onChange={tick(setQty)}
-            itemWidth={76}
+            itemWidth={80}
             itemHeight={92}
             accent={colors.primary}
             renderItem={(item) => (
@@ -156,35 +154,35 @@ export default function TitaScreen({
                 <View style={styles.qtyCircle}>
                   <Text style={styles.qtyNum}>{item.key}</Text>
                 </View>
-                <Text style={styles.qtyLabel}>{item.label}</Text>
+                <Text style={styles.qtyLabel} numberOfLines={1}>{item.label}</Text>
               </View>
             )}
           />
         </View>
 
-        {/* Color carousel */}
+        {/* Color */}
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Elige el color</Text>
+          <Text style={styles.panelTitle}>{t.chooseColor}</Text>
           <DragCarousel
             testID="carousel-color"
-            data={COLORS}
+            data={COLS}
             index={color}
             onChange={tick(setColor)}
-            itemWidth={112}
+            itemWidth={120}
             itemHeight={58}
             accent="#8B5CF6"
             renderItem={(item) => (
               <View style={styles.colorItem}>
                 <View style={[styles.colorDot, { backgroundColor: item.hex }]} />
-                <Text style={styles.colorName}>{item.name}</Text>
+                <Text style={styles.colorName} numberOfLines={1}>{item.name}</Text>
               </View>
             )}
           />
         </View>
 
-        {/* Object selector */}
+        {/* Object */}
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Elige el objeto</Text>
+          <Text style={styles.panelTitle}>{t.chooseObject}</Text>
           <Pressable
             testID="object-selector-button"
             onPress={() => setObjModal(true)}
@@ -202,7 +200,7 @@ export default function TitaScreen({
           style={({ pressed }) => [styles.generateBtn, pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] }]}
         >
           <Ionicons name="sparkles" size={18} color="#fff" />
-          <Text style={styles.generateText}>Generar</Text>
+          <Text style={styles.generateText}>{t.generate}</Text>
         </Pressable>
 
         {cards ? (
@@ -210,7 +208,7 @@ export default function TitaScreen({
             <View style={[styles.card, styles.cardAff]} testID="card-affirmative">
               <View style={styles.cardHeaderRow}>
                 <View style={[styles.tag, { backgroundColor: colors.affirmativeBg }]}>
-                  <Text style={[styles.tagText, { color: colors.affirmative }]}>AFIRMATIVA</Text>
+                  <Text style={[styles.tagText, { color: colors.affirmative }]}>{t.aff}</Text>
                 </View>
                 <View style={[styles.statusCircle, { backgroundColor: colors.affirmative }]}>
                   <Ionicons name="checkmark" size={16} color="#fff" />
@@ -223,7 +221,7 @@ export default function TitaScreen({
             <View style={styles.row}>
               <View style={[styles.card, styles.cardHalf]} testID="card-negative">
                 <View style={[styles.tag, { backgroundColor: colors.negativeBg, alignSelf: "flex-start" }]}>
-                  <Text style={[styles.tagText, { color: colors.negative }]}>NEGATIVA</Text>
+                  <Text style={[styles.tagText, { color: colors.negative }]}>{t.neg}</Text>
                 </View>
                 <View style={styles.statusRow}>
                   <View style={[styles.statusCircleSm, { backgroundColor: colors.negative }]}>
@@ -236,7 +234,7 @@ export default function TitaScreen({
 
               <View style={[styles.card, styles.cardHalf]} testID="card-question">
                 <View style={[styles.tag, { backgroundColor: colors.questionBg, alignSelf: "flex-start" }]}>
-                  <Text style={[styles.tagText, { color: colors.question }]}>PREGUNTA</Text>
+                  <Text style={[styles.tagText, { color: colors.question }]}>{t.que}</Text>
                 </View>
                 <View style={styles.statusRow}>
                   <View style={[styles.statusCircleSm, { backgroundColor: colors.question }]}>
@@ -251,17 +249,12 @@ export default function TitaScreen({
         ) : null}
       </ScrollView>
 
-      {/* Object modal with category tabs */}
       <Modal visible={objModal} animationType="slide" transparent onRequestClose={() => setObjModal(false)}>
         <View style={styles.modalBackdrop}>
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setObjModal(false)} />
           <View style={[styles.sheet, { paddingBottom: insets.bottom + 12 }]}>
             <View style={styles.sheetHandle} />
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.catRow}
-            >
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
               {CATEGORIES.map((c) => (
                 <Pressable
                   key={c}
@@ -288,7 +281,7 @@ export default function TitaScreen({
                     }}
                   >
                     <Text style={styles.objChipEmoji}>{o.emoji}</Text>
-                    <Text style={[styles.objChipText, o.key === objKey && styles.objChipTextActive]}>{o.label}</Text>
+                    <Text style={[styles.objChipText, o.key === objKey && styles.objChipTextActive]} numberOfLines={1}>{o.label}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -311,71 +304,22 @@ const shadow = {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: { flexDirection: "row", alignItems: "center", marginBottom: spacing.md },
-  roundBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: colors.card,
-    alignItems: "center",
-    justifyContent: "center",
-    ...shadow,
-  },
+  roundBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.card, alignItems: "center", justifyContent: "center", ...shadow },
   kicker: { fontFamily: fonts.bold, fontSize: 11, letterSpacing: 1, color: colors.primary },
   headerTitle: { fontFamily: fonts.extrabold, fontSize: 20, color: colors.ink, textAlign: "center" },
-  panel: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    paddingVertical: spacing.md,
-    marginBottom: spacing.md,
-    ...shadow,
-  },
-  panelTitle: {
-    fontFamily: fonts.bold,
-    fontSize: 14,
-    color: colors.ink,
-    textAlign: "center",
-    marginBottom: spacing.sm,
-  },
+  panel: { backgroundColor: colors.card, borderRadius: radius.lg, paddingVertical: spacing.md, marginBottom: spacing.md, ...shadow },
+  panelTitle: { fontFamily: fonts.bold, fontSize: 14, color: colors.ink, textAlign: "center", marginBottom: spacing.sm },
   qtyCard: { flex: 1, alignItems: "center", justifyContent: "center" },
-  qtyCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#EEF2FE",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  qtyCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#EEF2FE", alignItems: "center", justifyContent: "center" },
   qtyNum: { fontFamily: fonts.extrabold, fontSize: 22, color: colors.primary },
   qtyLabel: { fontFamily: fonts.bold, fontSize: 13, color: colors.ink, marginTop: 4 },
   colorItem: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   colorDot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1, borderColor: "rgba(0,0,0,0.08)" },
-  colorName: { fontFamily: fonts.bold, fontSize: 17, color: colors.ink },
-  objButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginHorizontal: spacing.md,
-    backgroundColor: colors.questionBg,
-    borderRadius: radius.md,
-    paddingVertical: 12,
-  },
+  colorName: { fontFamily: fonts.bold, fontSize: 16, color: colors.ink },
+  objButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginHorizontal: spacing.md, backgroundColor: colors.questionBg, borderRadius: radius.md, paddingVertical: 12 },
   objEmoji: { fontSize: 24 },
   objButtonText: { fontFamily: fonts.extrabold, fontSize: 20, color: colors.question },
-  generateBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: colors.primary,
-    borderRadius: radius.pill,
-    paddingVertical: 15,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 5,
-  },
+  generateBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: colors.primary, borderRadius: radius.pill, paddingVertical: 15, shadowColor: colors.primary, shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 5 },
   generateText: { fontFamily: fonts.extrabold, fontSize: 17, color: "#fff" },
   card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, ...shadow },
   cardAff: { alignItems: "center", marginBottom: spacing.md },
@@ -389,55 +333,17 @@ const styles = StyleSheet.create({
   sentenceSm: { fontFamily: fonts.bold, fontSize: 15, color: colors.ink, flexShrink: 1 },
   tag: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: radius.pill },
   tagText: { fontFamily: fonts.extrabold, fontSize: 10, letterSpacing: 0.5 },
-  speakBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: spacing.md,
-    alignSelf: "center",
-  },
+  speakBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", marginTop: spacing.md, alignSelf: "center" },
   modalBackdrop: { flex: 1, backgroundColor: "rgba(20,22,40,0.4)", justifyContent: "flex-end" },
-  sheet: {
-    maxHeight: "78%",
-    backgroundColor: colors.card,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    paddingHorizontal: spacing.md,
-    paddingTop: 10,
-  },
-  sheetHandle: {
-    width: 44,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: colors.border,
-    alignSelf: "center",
-    marginBottom: spacing.md,
-  },
+  sheet: { maxHeight: "78%", backgroundColor: colors.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, paddingHorizontal: spacing.md, paddingTop: 10 },
+  sheetHandle: { width: 44, height: 5, borderRadius: 3, backgroundColor: colors.border, alignSelf: "center", marginBottom: spacing.md },
   catRow: { gap: 8, paddingRight: spacing.md },
-  catChip: {
-    flexShrink: 0,
-    height: 40,
-    paddingHorizontal: 16,
-    borderRadius: radius.pill,
-    backgroundColor: "#F1F3F9",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  catChip: { flexShrink: 0, height: 40, paddingHorizontal: 16, borderRadius: radius.pill, backgroundColor: "#F1F3F9", alignItems: "center", justifyContent: "center" },
   catChipActive: { backgroundColor: colors.ink },
   catText: { fontFamily: fonts.bold, fontSize: 14, color: colors.inkSoft },
   catTextActive: { color: "#fff", fontFamily: fonts.extrabold },
   objGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  objChip: {
-    width: "31%",
-    minHeight: 82,
-    borderRadius: radius.md,
-    backgroundColor: "#F5F6FA",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-  },
+  objChip: { width: "31%", minHeight: 82, borderRadius: radius.md, backgroundColor: "#F5F6FA", alignItems: "center", justifyContent: "center", paddingVertical: 8, paddingHorizontal: 4 },
   objChipActive: { backgroundColor: colors.questionBg, borderWidth: 2, borderColor: colors.question },
   objChipEmoji: { fontSize: 30, marginBottom: 4 },
   objChipText: { fontFamily: fonts.bold, fontSize: 13, color: colors.ink },

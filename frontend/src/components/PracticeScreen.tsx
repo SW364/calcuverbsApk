@@ -19,12 +19,14 @@ import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
 
 import { colors, fonts, spacing, radius } from "@/src/theme";
 import DragCarousel from "@/src/components/DragCarousel";
-import { SUBJECTS } from "@/src/data/verbs";
 import { OptionItem, Trio } from "@/src/data/conjugation";
 import { Sentence } from "@/src/data/verbs";
+import { STRINGS } from "@/src/i18n";
 
 const BACKEND = process.env.EXPO_PUBLIC_BACKEND_URL;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+type UIT = (typeof STRINGS)["en"];
 
 export type PracticeConfig = {
   moduleLabel: string;
@@ -37,6 +39,8 @@ export type PracticeConfig = {
   divided?: { regular: string[]; irregular: string[] };
   defaultVerb: string;
   build: (subjectLabel: string, optionKey: string, verb: string) => Trio;
+  subjects: { label: string; emoji: string }[];
+  t: UIT;
 };
 
 function OptionPill({ label, active }: { label: string; active: boolean }) {
@@ -128,7 +132,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
   }, []);
 
   useEffect(() => {
-    setCards(cfg.build(SUBJECTS[0].label, cfg.options[0].key, cfg.defaultVerb));
+    setCards(cfg.build(cfg.subjects[0].label, cfg.options[0].key, cfg.defaultVerb));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -141,7 +145,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
 
   const generate = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    setCards(cfg.build(SUBJECTS[subj].label, cfg.options[opt].key, verb));
+    setCards(cfg.build(cfg.subjects[subj].label, cfg.options[opt].key, verb));
   }, [cfg, subj, opt, verb]);
 
   const speak = useCallback(
@@ -189,10 +193,10 @@ export default function PracticeScreen(cfg: PracticeConfig) {
 
         {/* Subject carousel */}
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Elige tu sujeto</Text>
+          <Text style={styles.panelTitle}>{cfg.t.chooseSubject}</Text>
           <DragCarousel
             testID="carousel-subject"
-            data={SUBJECTS}
+            data={cfg.subjects}
             index={subj}
             onChange={tick(setSubj)}
             itemWidth={78}
@@ -219,7 +223,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
 
         {/* Verb selector */}
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Elige tu verbo</Text>
+          <Text style={styles.panelTitle}>{cfg.t.chooseVerb}</Text>
           <Pressable
             testID="verb-selector-button"
             onPress={() => setVerbModal(true)}
@@ -237,7 +241,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
           style={({ pressed }) => [styles.generateBtn, pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] }]}
         >
           <Ionicons name="sparkles" size={18} color="#fff" />
-          <Text style={styles.generateText}>Generar</Text>
+          <Text style={styles.generateText}>{cfg.t.generate}</Text>
         </Pressable>
 
         {cards ? (
@@ -245,7 +249,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
             <View style={[styles.card, styles.cardAff]} testID="card-affirmative">
               <View style={styles.cardHeaderRow}>
                 <View style={[styles.tag, { backgroundColor: colors.affirmativeBg }]}>
-                  <Text style={[styles.tagText, { color: colors.affirmative }]}>AFIRMATIVA</Text>
+                  <Text style={[styles.tagText, { color: colors.affirmative }]}>{cfg.t.aff}</Text>
                 </View>
                 <View style={[styles.statusCircle, { backgroundColor: colors.affirmative }]}>
                   <Ionicons name="checkmark" size={16} color="#fff" />
@@ -263,7 +267,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
             <View style={styles.row}>
               <View style={[styles.card, styles.cardHalf]} testID="card-negative">
                 <View style={[styles.tag, { backgroundColor: colors.negativeBg, alignSelf: "flex-start" }]}>
-                  <Text style={[styles.tagText, { color: colors.negative }]}>NEGATIVA</Text>
+                  <Text style={[styles.tagText, { color: colors.negative }]}>{cfg.t.neg}</Text>
                 </View>
                 <View style={styles.statusRow}>
                   <View style={[styles.statusCircleSm, { backgroundColor: colors.negative }]}>
@@ -281,7 +285,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
 
               <View style={[styles.card, styles.cardHalf]} testID="card-question">
                 <View style={[styles.tag, { backgroundColor: colors.questionBg, alignSelf: "flex-start" }]}>
-                  <Text style={[styles.tagText, { color: colors.question }]}>PREGUNTA</Text>
+                  <Text style={[styles.tagText, { color: colors.question }]}>{cfg.t.que}</Text>
                 </View>
                 <View style={styles.statusRow}>
                   <View style={[styles.statusCircleSm, { backgroundColor: colors.question }]}>
@@ -320,7 +324,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
                   onPress={() => setVerbTab("regular")}
                 >
                   <Text style={[styles.tabText, verbTab === "regular" && styles.tabTextActive]}>
-                    Regulares
+                    {cfg.t.regular}
                   </Text>
                 </Pressable>
                 <Pressable
@@ -329,18 +333,18 @@ export default function PracticeScreen(cfg: PracticeConfig) {
                   onPress={() => setVerbTab("irregular")}
                 >
                   <Text style={[styles.tabText, verbTab === "irregular" && styles.tabTextActive]}>
-                    Irregulares
+                    {cfg.t.irregular}
                   </Text>
                 </Pressable>
               </View>
             ) : (
-              <Text style={styles.sheetTitle}>Elige un verbo</Text>
+              <Text style={styles.sheetTitle}>{cfg.t.sheetTitle}</Text>
             )}
             <View style={styles.searchBox}>
               <Ionicons name="search" size={18} color={colors.inkSoft} />
               <TextInput
                 testID="verb-search"
-                placeholder="Buscar verbo…"
+                placeholder={cfg.t.search}
                 placeholderTextColor={colors.inkSoft}
                 value={search}
                 onChangeText={setSearch}

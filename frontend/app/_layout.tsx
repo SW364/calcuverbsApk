@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useFonts } from "expo-font";
 
 import { useIconFonts } from "@/src/hooks/use-icon-fonts";
+import { LanguageProvider } from "@/src/context/LanguageContext";
 
 // Disable logbox errors etc so that users can see the app
 // and agent works as expected.
@@ -41,7 +42,9 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <LanguageProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </LanguageProvider>
     </GestureHandlerRootView>
   );
 }
