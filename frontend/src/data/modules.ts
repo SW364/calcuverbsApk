@@ -10,7 +10,7 @@ import {
   M1A_VERBS, M2A_VERBS, M3A_VERBS, M4A_VERBS,
 } from "@/src/data/conjugation";
 import {
-  SUBJECTS_ES, TENSES_ES, TENSES_PROG_ES,
+  SUBJECTS_ES, TENSES_ES, TENSES_PROG_ES, AUX_OPTIONS_ES,
   buildM1AEs, buildM1BEs, buildM2BEs, buildTenseEs,
   ES_VERBS, ES_REGULAR, ES_IRREGULAR, ES_MIX,
 } from "@/src/data/conjugation_es";
@@ -40,7 +40,7 @@ export function getPracticeConfig(id: Id, learn: LearnLang): PracticeConfig {
     case "m1a":
       return {
         moduleLabel, title, t, subjects,
-        optionTitle: t.chooseAux, options: AUX_OPTIONS, optionItemWidth: 94, optionAccent: ACCENT.m1a,
+        optionTitle: t.chooseAux, options: es ? AUX_OPTIONS_ES : AUX_OPTIONS, optionItemWidth: 94, optionAccent: ACCENT.m1a,
         ...(es
           ? { verbs: ES_VERBS, defaultVerb: "cortar", build: buildM1AEs }
           : { divided: { regular: REGULAR_VERBS, irregular: IRREGULAR_VERBS }, defaultVerb: "cut", build: buildM1A }),
@@ -48,7 +48,7 @@ export function getPracticeConfig(id: Id, learn: LearnLang): PracticeConfig {
     case "m1b":
       return {
         moduleLabel, title, t, subjects,
-        optionTitle: t.chooseAux, options: AUX_OPTIONS, optionItemWidth: 94, optionAccent: ACCENT.m1b,
+        optionTitle: t.chooseAux, options: es ? AUX_OPTIONS_ES : AUX_OPTIONS, optionItemWidth: 94, optionAccent: ACCENT.m1b,
         verbs: es ? ES_VERBS : M1A_VERBS,
         defaultVerb: es ? "cortar" : "add",
         build: es ? buildM1BEs : buildM1B,

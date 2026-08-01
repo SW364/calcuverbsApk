@@ -10,13 +10,12 @@ export const SUBJECTS_ES: EsSubject[] = [
   { label: "Tú", emoji: "🧑" },
   { label: "Él", emoji: "👦" },
   { label: "Ella", emoji: "👧" },
-  { label: "Ello", emoji: "🐱" },
   { label: "Nosotros", emoji: "👨‍👩‍👦" },
   { label: "Ellos", emoji: "👥" },
 ];
 
 const PERSON_ES: Record<string, number> = {
-  Yo: 0, Tú: 1, Él: 2, Ella: 2, Ello: 2, Nosotros: 3, Ellos: 4,
+  Yo: 0, Tú: 1, Él: 2, Ella: 2, Nosotros: 3, Ellos: 4,
 };
 
 const capFirst = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -113,6 +112,18 @@ const MODAL_ES: Record<string, { conj: string[]; will?: boolean }> = {
   Must: { conj: deberPres },
   Will: { conj: irPres, will: true },
 };
+
+// Auxiliary carousel labels in Spanish (same keys as English AUX_OPTIONS).
+export const AUX_OPTIONS_ES: OptionItem[] = [
+  { key: "Can", label: "Puedo" },
+  { key: "Could", label: "Podría" },
+  { key: "Would", label: "Querría" },
+  { key: "Should", label: "Debería" },
+  { key: "May", label: "Puedo" },
+  { key: "Might", label: "Podría" },
+  { key: "Must", label: "Debo" },
+  { key: "Will", label: "Voy a" },
+];
 
 // ---- Datasets ----
 export const ES_REGULAR = [

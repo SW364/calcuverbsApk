@@ -1,0 +1,30 @@
+{
+  "summary": "Frontend-only verification for bilingual verb-learning Expo app. Both Spanish bug fixes verified as WORKING and English regression PASSES. BUG1: In Spanish mode, subject carousel on M1.A shows exactly [Yo, Tú, Él, Ella, Nosotros, Ellos] with NO 'Ello'. BUG2: On M1.A and M1.B in Spanish mode, auxiliary carousel shows Spanish labels [Puedo, Podría, Querría, Debería, Puedo, Podría, Debo, Voy a] with no English words. Regression: ES M1.A default cards render 'Yo puedo cortar.', 'Yo no puedo cortar.', '¿Puedo yo cortar?'. English mode still defaults on fresh load: subject 'I', aux carousel starts with 'Can', affirmative card 'I can cut.'.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": [
+      {"component": "shadow* style props", "issue": "Console warning: 'shadow*' style props are deprecated. Use 'boxShadow'. Not blocking. Reference: /app/frontend/app/index.tsx:123 and other style sheets using shadowColor/shadowOpacity/shadowRadius/shadowOffset."},
+      {"component": "props.pointerEvents", "issue": "Console warning: props.pointerEvents is deprecated. Use style.pointerEvents. Non-blocking, likely inside a library component."}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/iteration_2.json"],
+  "action_items": [
+    "Optional: migrate shadow* style props to boxShadow (RN new architecture) to silence deprecation warnings.",
+    "Optional: replace props.pointerEvents with style.pointerEvents where applicable."
+  ],
+  "critical_code_review_comments": [
+    "SUBJECTS_ES in /app/frontend/src/data/conjugation_es.ts correctly contains only 6 entries (Yo, Tú, Él, Ella, Nosotros, Ellos) — 'Ello' removed as required.",
+    "AUX_OPTIONS_ES in /app/frontend/src/data/conjugation_es.ts provides Spanish labels while keeping the same keys (Can/Could/...) so builders and English side keep working — clean design.",
+    "PERSON_ES mapping still supports Él and Ella both to index 2, consistent with the removed 'Ello'."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not tested)", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Language state is client-side context. To test Spanish, switch within same session via menu-button -> lang-spanish, then tap module-M1.A / module-M1.B. Note: UI language is inverse of learn language (learn=en shows Spanish UI headers like 'AFIRMATIVA', learn=es shows English UI headers like 'AFFIRMATIVE'). This is by design.",
+  "rca_of_issue": "N/A — both fixes verified as effective."
+}
