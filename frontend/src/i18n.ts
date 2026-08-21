@@ -25,6 +25,7 @@ type UIStrings = {
   languageMenu: string;
   langEnglish: string;
   langSpanish: string;
+  langMixed: string;
   tenses: string;
 };
 
@@ -50,6 +51,7 @@ export const STRINGS: Record<"en" | "es", UIStrings> = {
     languageMenu: "Lenguaje para aprender",
     langEnglish: "Inglés",
     langSpanish: "Español",
+    langMixed: "Mixto",
     tenses: "tiempos",
   },
   en: {
@@ -73,6 +75,7 @@ export const STRINGS: Record<"en" | "es", UIStrings> = {
     languageMenu: "Language to learn",
     langEnglish: "English",
     langSpanish: "Spanish",
+    langMixed: "Mixed",
     tenses: "tenses",
   },
 };

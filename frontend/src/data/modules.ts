@@ -14,6 +14,7 @@ import {
   buildM1AEs, buildM1BEs, buildM2BEs, buildTenseEs,
   ES_VERBS, ES_REGULAR, ES_IRREGULAR, ES_MIX,
 } from "@/src/data/conjugation_es";
+import { makeReference, ModuleId } from "@/src/data/bilingual";
 
 type Id = "m1a" | "m1b" | "m2a" | "m2b" | "m3a" | "m4a";
 
@@ -26,7 +27,13 @@ const ACCENT: Record<Id, string> = {
   m2a: "#8B5CF6", m2b: "#F0654A", m3a: "#8B5CF6", m4a: "#22B573",
 };
 
-export function getPracticeConfig(id: Id, learn: LearnLang): PracticeConfig {
+export function getPracticeConfig(id: Id, learn: LearnLang, mixed = false): PracticeConfig {
+  const cfg = buildBase(id, learn);
+  if (mixed) cfg.mixed = makeReference(id as ModuleId, learn);
+  return cfg;
+}
+
+function buildBase(id: Id, learn: LearnLang): PracticeConfig {
   const ui = uiLangOf(learn);
   const t = STRINGS[ui];
   const es = learn === "es";

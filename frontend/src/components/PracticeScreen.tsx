@@ -21,6 +21,7 @@ import { colors, fonts, spacing, radius } from "@/src/theme";
 import DragCarousel from "@/src/components/DragCarousel";
 import { OptionItem, Trio } from "@/src/data/conjugation";
 import { Sentence } from "@/src/data/verbs";
+import { MixedReference } from "@/src/data/bilingual";
 import { STRINGS } from "@/src/i18n";
 
 const BACKEND = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -41,6 +42,7 @@ export type PracticeConfig = {
   build: (subjectLabel: string, optionKey: string, verb: string) => Trio;
   subjects: { label: string; emoji: string }[];
   t: UIT;
+  mixed?: MixedReference;
 };
 
 function OptionPill({ label, active }: { label: string; active: boolean }) {
@@ -124,6 +126,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
   const [verbTab, setVerbTab] = useState<"regular" | "irregular">("regular");
   const [search, setSearch] = useState("");
   const [cards, setCards] = useState<Trio | null>(null);
+  const [refCards, setRefCards] = useState<Trio | null>(null);
 
   const player = useAudioPlayer(null);
 
@@ -132,9 +135,12 @@ export default function PracticeScreen(cfg: PracticeConfig) {
   }, []);
 
   useEffect(() => {
-    setCards(cfg.build(cfg.subjects[0].label, cfg.options[0].key, cfg.defaultVerb));
+    const s = cfg.subjects[0].label;
+    const k = cfg.options[0].key;
+    setCards(cfg.build(s, k, cfg.defaultVerb));
+    setRefCards(cfg.mixed ? cfg.mixed.build(s, k, cfg.defaultVerb) : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [cfg.mixed]);
 
   const tick = useCallback((setter: (i: number) => void) => {
     return (i: number) => {
@@ -145,7 +151,10 @@ export default function PracticeScreen(cfg: PracticeConfig) {
 
   const generate = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    setCards(cfg.build(cfg.subjects[subj].label, cfg.options[opt].key, verb));
+    const s = cfg.subjects[subj].label;
+    const k = cfg.options[opt].key;
+    setCards(cfg.build(s, k, verb));
+    setRefCards(cfg.mixed ? cfg.mixed.build(s, k, verb) : null);
   }, [cfg, subj, opt, verb]);
 
   const speak = useCallback(
@@ -190,6 +199,15 @@ export default function PracticeScreen(cfg: PracticeConfig) {
             <Ionicons name="bookmark-outline" size={20} color={colors.primary} />
           </View>
         </View>
+
+        {/* Mixed-mode indicator (small & discreet) */}
+        {cfg.mixed ? (
+          <View style={styles.mixedChip} testID="mixed-indicator">
+            <Text style={styles.mixedChipText}>🌎 MIXED</Text>
+            <View style={styles.mixedDot} />
+            <Text style={styles.mixedDir}>{cfg.mixed.direction}</Text>
+          </View>
+        ) : null}
 
         {/* Subject carousel */}
         <View style={styles.panel}>
@@ -256,6 +274,11 @@ export default function PracticeScreen(cfg: PracticeConfig) {
                 </View>
               </View>
               <SentenceText sentence={cards.affirmative} color={colors.affirmative} />
+              {cfg.mixed && refCards ? (
+                <Text style={styles.refSentence} testID="ref-affirmative">
+                  {refCards.affirmative.full}
+                </Text>
+              ) : null}
               <SpeakButton
                 onPress={() => speak(cards.affirmative.full)}
                 color={colors.affirmative}
@@ -275,6 +298,11 @@ export default function PracticeScreen(cfg: PracticeConfig) {
                   </View>
                   <SentenceText sentence={cards.negative} color={colors.negative} small />
                 </View>
+                {cfg.mixed && refCards ? (
+                  <Text style={styles.refSentenceSm} testID="ref-negative">
+                    {refCards.negative.full}
+                  </Text>
+                ) : null}
                 <SpeakButton
                   onPress={() => speak(cards.negative.full)}
                   color={colors.negative}
@@ -293,6 +321,11 @@ export default function PracticeScreen(cfg: PracticeConfig) {
                   </View>
                   <SentenceText sentence={cards.question} color={colors.question} small />
                 </View>
+                {cfg.mixed && refCards ? (
+                  <Text style={styles.refSentenceSm} testID="ref-question">
+                    {refCards.question.full}
+                  </Text>
+                ) : null}
                 <SpeakButton
                   onPress={() => speak(cards.question.full)}
                   color={colors.question}
@@ -474,6 +507,41 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   sentenceSm: { fontFamily: fonts.bold, fontSize: 15, color: colors.ink, flexShrink: 1 },
+  refSentence: {
+    fontFamily: fonts.semibold,
+    fontSize: 15,
+    fontStyle: "italic",
+    color: colors.inkSoft,
+    textAlign: "center",
+    marginTop: 4,
+  },
+  refSentenceSm: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    fontStyle: "italic",
+    color: colors.inkSoft,
+    marginTop: 6,
+  },
+  mixedChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+    gap: 8,
+    backgroundColor: colors.card,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    marginBottom: spacing.md,
+    ...shadow,
+  },
+  mixedChipText: {
+    fontFamily: fonts.extrabold,
+    fontSize: 11,
+    letterSpacing: 0.5,
+    color: colors.primary,
+  },
+  mixedDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: colors.inkSoft },
+  mixedDir: { fontFamily: fonts.bold, fontSize: 11, letterSpacing: 0.5, color: colors.inkSoft },
   tag: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: radius.pill },
   tagText: { fontFamily: fonts.extrabold, fontSize: 10, letterSpacing: 0.5 },
   speakBtn: {

@@ -34,14 +34,27 @@ const MODULES: Module[] = [
 export default function Modules() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { lang, setLang } = useLanguage();
+  const { lang, setLang, mixed, setMixed } = useLanguage();
   const t = STRINGS[uiLangOf(lang)];
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const pick = (l: LearnLang) => {
+  const pickLang = (l: LearnLang) => {
     setLang(l);
+    setMixed(false);
     setMenuOpen(false);
   };
+
+  const pickMixed = () => {
+    if (mixed) {
+      // already in mixed: flip the primary language (flips direction)
+      setLang(lang === "en" ? "es" : "en");
+    } else {
+      setMixed(true);
+    }
+    setMenuOpen(false);
+  };
+
+  const mixedDir = lang === "en" ? "EN → ES" : "ES → EN";
 
   return (
     <LinearGradient colors={[colors.bgTop, colors.bgBottom]} style={styles.flex}>
@@ -102,16 +115,25 @@ export default function Modules() {
         <Pressable style={styles.menuBackdrop} onPress={() => setMenuOpen(false)}>
           <View style={[styles.menuCard, { top: insets.top + 58 }]}>
             <Text style={styles.menuTitle}>{t.languageMenu}</Text>
-            <Pressable testID="lang-english" style={styles.menuItem} onPress={() => pick("en")}>
+            <Pressable testID="lang-english" style={styles.menuItem} onPress={() => pickLang("en")}>
               <Text style={styles.menuFlag}>🇬🇧</Text>
               <Text style={styles.menuItemText}>{t.langEnglish}</Text>
-              {lang === "en" ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
+              {!mixed && lang === "en" ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
             </Pressable>
             <View style={styles.menuDivider} />
-            <Pressable testID="lang-spanish" style={styles.menuItem} onPress={() => pick("es")}>
+            <Pressable testID="lang-spanish" style={styles.menuItem} onPress={() => pickLang("es")}>
               <Text style={styles.menuFlag}>🇪🇸</Text>
               <Text style={styles.menuItemText}>{t.langSpanish}</Text>
-              {lang === "es" ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
+              {!mixed && lang === "es" ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
+            </Pressable>
+            <View style={styles.menuDivider} />
+            <Pressable testID="lang-mixed" style={styles.menuItem} onPress={pickMixed}>
+              <Text style={styles.menuFlag}>🌎</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.menuItemText}>{t.langMixed}</Text>
+                {mixed ? <Text style={styles.menuSub}>{mixedDir}</Text> : null}
+              </View>
+              {mixed ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
             </Pressable>
           </View>
         </Pressable>
@@ -158,5 +180,6 @@ const styles = StyleSheet.create({
   menuItem: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12, paddingHorizontal: 10, borderRadius: radius.md },
   menuFlag: { fontSize: 20 },
   menuItemText: { flex: 1, fontFamily: fonts.bold, fontSize: 16, color: colors.ink },
+  menuSub: { fontFamily: fonts.bold, fontSize: 12, color: colors.primary, marginTop: 1 },
   menuDivider: { height: 1, backgroundColor: colors.border, marginHorizontal: 10 },
 });

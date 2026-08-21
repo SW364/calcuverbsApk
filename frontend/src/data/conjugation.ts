@@ -308,4 +308,78 @@ export function buildM2B(subjLabel: string, tenseKey: string, verb: string): Tri
   return buildTenseProgressive(subjLabel, tenseKey, verb);
 }
 
+// ---- General-purpose English tense builder (used for Mixed Mode reference) ----
+// Correctly conjugates ANY verb regardless of module category by resolving its
+// forms from the irregular DB, an extra irregular set, an invariant set, or the
+// regular spelling rules.
+const EXTRA_IRREGULAR_EN: Record<string, { past: string; pp: string }> = {
+  speak: { past: "spoke", pp: "spoken" },
+  come: { past: "came", pp: "come" },
+  give: { past: "gave", pp: "given" },
+  take: { past: "took", pp: "taken" },
+  get: { past: "got", pp: "gotten" },
+  write: { past: "wrote", pp: "written" },
+  drive: { past: "drove", pp: "driven" },
+  ride: { past: "rode", pp: "ridden" },
+  meet: { past: "met", pp: "met" },
+  begin: { past: "began", pp: "begun" },
+  choose: { past: "chose", pp: "chosen" },
+  sit: { past: "sat", pp: "sat" },
+  stand: { past: "stood", pp: "stood" },
+  fall: { past: "fell", pp: "fallen" },
+  find: { past: "found", pp: "found" },
+  keep: { past: "kept", pp: "kept" },
+  build: { past: "built", pp: "built" },
+  catch: { past: "caught", pp: "caught" },
+  fight: { past: "fought", pp: "fought" },
+  think: { past: "thought", pp: "thought" },
+  bring: { past: "brought", pp: "brought" },
+  wear: { past: "wore", pp: "worn" },
+  throw: { past: "threw", pp: "thrown" },
+  grow: { past: "grew", pp: "grown" },
+  draw: { past: "drew", pp: "drawn" },
+  fly: { past: "flew", pp: "flown" },
+  feel: { past: "felt", pp: "felt" },
+  leave: { past: "left", pp: "left" },
+  lose: { past: "lost", pp: "lost" },
+  pay: { past: "paid", pp: "paid" },
+  sell: { past: "sold", pp: "sold" },
+  tell: { past: "told", pp: "told" },
+  send: { past: "sent", pp: "sent" },
+  spend: { past: "spent", pp: "spent" },
+  sleep: { past: "slept", pp: "slept" },
+  teach: { past: "taught", pp: "taught" },
+  understand: { past: "understood", pp: "understood" },
+  win: { past: "won", pp: "won" },
+  hear: { past: "heard", pp: "heard" },
+};
+
+const INVARIANT_EN = new Set([
+  "cut", "put", "hit", "set", "cost", "let", "shut", "bet", "hurt", "read",
+  "spread", "split", "quit", "wet", "wed", "shed", "burst", "cast", "fit",
+  "broadcast", "forecast", "offset", "upset", "undercut", "sublet", "recast",
+  "reset", "retrofit", "miscast", "typecast",
+]);
+
+export function buildTenseGeneralEn(subjLabel: string, tenseKey: string, verb: string): Trio {
+  if (verb === "be") return buildTense(subjLabel, tenseKey, "be", "was", "been");
+
+  let past: string;
+  let pp: string;
+  if (INVARIANT_EN.has(verb)) {
+    past = verb;
+    pp = verb;
+  } else {
+    const irr = IRREGULAR_FORMS[verb] ?? EXTRA_IRREGULAR_EN[verb];
+    if (irr) {
+      past = irr.past;
+      pp = irr.pp;
+    } else {
+      past = regularPast(verb);
+      pp = regularPast(verb);
+    }
+  }
+  return buildTense(subjLabel, tenseKey, verb, past, pp);
+}
+
 export { SUBJECTS };
