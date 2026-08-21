@@ -17,17 +17,18 @@ type Module = {
   bg: string;
   route?: string;
   badge?: string;
+  tenses: number;
 };
 
 const MODULES: Module[] = [
-  { code: "M1.A", icon: "book", color: "#4A7DF0", bg: "#E8F1FC", route: "/m1a" },
-  { code: "M1.B", icon: "chatbubble-ellipses", color: "#1FB6A6", bg: "#E4F6F3", route: "/m1b" },
-  { code: "M2.A", icon: "create", color: "#F5A623", bg: "#FDF3E1", route: "/m2a" },
-  { code: "M2.B", icon: "flash", color: "#F0654A", bg: "#FDECE8", route: "/m2b" },
-  { code: "M3.A", icon: "star", color: "#8B5CF6", bg: "#F0EAFB", route: "/m3a" },
-  { code: "Tita I", icon: "cube", color: "#EC4899", bg: "#FCE7F1", route: "/tita1", badge: "Nuevo" },
-  { code: "M4.A", icon: "flag", color: "#22B573", bg: "#E7F8EF", route: "/m4a" },
-  { code: "Tita II", icon: "time", color: "#3B82F6", bg: "#E7F0FD", route: "/tita2", badge: "Nuevo" },
+  { code: "M1.A", icon: "book", color: "#4A7DF0", bg: "#E8F1FC", route: "/m1a", tenses: 9 },
+  { code: "M1.B", icon: "chatbubble-ellipses", color: "#1FB6A6", bg: "#E4F6F3", route: "/m1b", tenses: 9 },
+  { code: "M2.A", icon: "create", color: "#F5A623", bg: "#FDF3E1", route: "/m2a", tenses: 4 },
+  { code: "M2.B", icon: "flash", color: "#F0654A", bg: "#FDECE8", route: "/m2b", tenses: 4 },
+  { code: "M3.A", icon: "star", color: "#8B5CF6", bg: "#F0EAFB", route: "/m3a", tenses: 4 },
+  { code: "Tita I", icon: "cube", color: "#EC4899", bg: "#FCE7F1", route: "/tita1", badge: "Nuevo", tenses: 2 },
+  { code: "M4.A", icon: "flag", color: "#22B573", bg: "#E7F8EF", route: "/m4a", tenses: 4 },
+  { code: "Tita II", icon: "time", color: "#3B82F6", bg: "#E7F0FD", route: "/tita2", badge: "Nuevo", tenses: 2 },
 ];
 
 export default function Modules() {
@@ -83,7 +84,12 @@ export default function Modules() {
               <Text style={styles.moduleTitle} numberOfLines={2}>
                 {MODULE_TITLES[lang][m.code]}
               </Text>
-              <View style={styles.chevRow}>
+              <View style={styles.footerRow}>
+                <View style={styles.hPill}>
+                  <Text style={[styles.hPillText, { color: m.color }]}>{`H${m.tenses}`}</Text>
+                </View>
+                <Text style={styles.tensesText}>{`${m.tenses} ${t.tenses}`}</Text>
+                <View style={{ flex: 1 }} />
                 <Ionicons name="chevron-forward" size={18} color={m.color} />
               </View>
             </Pressable>
@@ -125,11 +131,21 @@ const styles = StyleSheet.create({
   title: { fontFamily: fonts.extrabold, fontSize: 30, color: colors.ink, textAlign: "center" },
   subtitle: { fontFamily: fonts.regular, fontSize: 14, color: colors.inkSoft, textAlign: "center", marginTop: 2, marginBottom: spacing.lg },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  cardModule: { width: "48%", borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.md, minHeight: 150 },
+  cardModule: { width: "48%", borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.md, minHeight: 168 },
   iconCircle: { width: 46, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", marginBottom: spacing.sm },
   moduleCode: { fontFamily: fonts.extrabold, fontSize: 22 },
   moduleTitle: { fontFamily: fonts.semibold, fontSize: 13, color: colors.inkSoft, marginTop: 2 },
-  chevRow: { alignItems: "flex-end", marginTop: spacing.sm },
+  footerRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: "auto", paddingTop: spacing.sm },
+  hPill: {
+    backgroundColor: "rgba(255,255,255,0.75)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radius.pill,
+    minWidth: 30,
+    alignItems: "center",
+  },
+  hPillText: { fontFamily: fonts.extrabold, fontSize: 12 },
+  tensesText: { fontFamily: fonts.semibold, fontSize: 12, color: colors.inkSoft },
   badge: { position: "absolute", top: 10, right: 10, backgroundColor: "#EC4899", paddingHorizontal: 10, paddingVertical: 3, borderRadius: radius.pill },
   badgeText: { fontFamily: fonts.bold, fontSize: 11, color: "#fff" },
   menuBackdrop: { flex: 1, backgroundColor: "rgba(20,22,40,0.25)" },
