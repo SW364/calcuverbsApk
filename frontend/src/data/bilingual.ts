@@ -17,6 +17,8 @@ import {
   buildM2BEs,
   buildTenseEs,
 } from "@/src/data/conjugation_es";
+import { buildTita } from "@/src/data/tita";
+import { buildTitaEs } from "@/src/data/tita_es";
 
 export type ModuleId = "m1a" | "m1b" | "m2a" | "m2b" | "m3a" | "m4a";
 
@@ -160,6 +162,38 @@ export function makeReference(id: ModuleId, learn: LearnLang): MixedReference {
     return other === "es"
       ? buildRefEs(id, s, optionKey, v)
       : buildRefEn(id, s, optionKey, v);
+  };
+  return { direction, build };
+}
+
+// ---- Tita (There is/are · There was/were) reference ----
+// The Tita engines share objKey + qtyKey across languages; only the color name
+// differs (it's referenced by display name), so we map it by index.
+const EN2ES_COLOR: Record<string, string> = {
+  Blue: "Azul", Green: "Verde", Yellow: "Amarillo", Red: "Rojo", Orange: "Naranja",
+};
+const ES2EN_COLOR: Record<string, string> = {
+  Azul: "Blue", Verde: "Green", Amarillo: "Yellow", Rojo: "Red", Naranja: "Orange",
+};
+
+export type TitaReference = {
+  direction: string;
+  build: (tense: "present" | "past", qtyKey: number, colorName: string, objKey: string) => Trio;
+};
+
+export function makeTitaReference(learn: LearnLang): TitaReference {
+  const other: LearnLang = learn === "en" ? "es" : "en";
+  const direction = learn === "en" ? "EN → ES" : "ES → EN";
+  const build = (
+    tense: "present" | "past",
+    qtyKey: number,
+    colorName: string,
+    objKey: string,
+  ): Trio => {
+    if (other === "es") {
+      return buildTitaEs(tense, qtyKey, EN2ES_COLOR[colorName] ?? colorName, objKey);
+    }
+    return buildTita(tense, qtyKey, ES2EN_COLOR[colorName] ?? colorName, objKey);
   };
   return { direction, build };
 }

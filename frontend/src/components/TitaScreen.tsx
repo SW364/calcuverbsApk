@@ -21,6 +21,7 @@ import { Sentence } from "@/src/data/verbs";
 import { Trio } from "@/src/data/conjugation";
 import { QUANTITIES, COLORS, OBJECTS, CATEGORIES, Categoria, buildTita } from "@/src/data/tita";
 import { QUANTITIES_ES, COLORS_ES, OBJECTS_ES, buildTitaEs } from "@/src/data/tita_es";
+import { makeTitaReference } from "@/src/data/bilingual";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { STRINGS, uiLangOf, MODULE_TITLES } from "@/src/i18n";
 
@@ -57,7 +58,7 @@ function SpeakButton({ onPress, color, bg, testID }: { onPress: () => void; colo
 export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { lang } = useLanguage();
+  const { lang, mixed } = useLanguage();
   const es = lang === "es";
   const t = STRINGS[uiLangOf(lang)];
 
@@ -76,6 +77,9 @@ export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
   const [objModal, setObjModal] = useState(false);
   const [cat, setCat] = useState<Categoria>("Fruits");
   const [cards, setCards] = useState<Trio | null>(null);
+  const [refCards, setRefCards] = useState<Trio | null>(null);
+
+  const titaRef = mixed ? makeTitaReference(lang) : null;
 
   const player = useAudioPlayer(null);
 
@@ -83,11 +87,13 @@ export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
     setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
   }, []);
 
-  // Regenerate initial card whenever the learning language changes.
+  // Regenerate initial card whenever the learning language / mixed mode changes.
   useEffect(() => {
-    setCards(build(tense, QTY[qty].key, COLS[color].name, objKey));
+    const args = [tense, QTY[qty].key, COLS[color].name, objKey] as const;
+    setCards(build(...args));
+    setRefCards(mixed ? makeTitaReference(lang).build(...args) : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang]);
+  }, [lang, mixed]);
 
   const tick = useCallback((setter: (i: number) => void) => {
     return (i: number) => {
@@ -98,8 +104,10 @@ export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
 
   const generate = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    setCards(build(tense, QTY[qty].key, COLS[color].name, objKey));
-  }, [build, tense, QTY, COLS, qty, color, objKey]);
+    const args = [tense, QTY[qty].key, COLS[color].name, objKey] as const;
+    setCards(build(...args));
+    setRefCards(mixed ? makeTitaReference(lang).build(...args) : null);
+  }, [build, tense, QTY, COLS, qty, color, objKey, mixed, lang]);
 
   const speak = useCallback(
     (text: string) => {
@@ -137,6 +145,15 @@ export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
             <Ionicons name="bookmark-outline" size={20} color={colors.primary} />
           </View>
         </View>
+
+        {/* Mixed-mode indicator (small & discreet) */}
+        {titaRef ? (
+          <View style={styles.mixedChip} testID="mixed-indicator">
+            <Text style={styles.mixedChipText}>🌎 MIXED</Text>
+            <View style={styles.mixedDot} />
+            <Text style={styles.mixedDir}>{titaRef.direction}</Text>
+          </View>
+        ) : null}
 
         {/* Quantity */}
         <View style={styles.panel}>
@@ -215,6 +232,9 @@ export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
                 </View>
               </View>
               <SentenceText sentence={cards.affirmative} color={colors.affirmative} />
+              {titaRef && refCards ? (
+                <Text style={styles.refSentence} testID="ref-affirmative">{refCards.affirmative.full}</Text>
+              ) : null}
               <SpeakButton onPress={() => speak(cards.affirmative.full)} color={colors.affirmative} bg={colors.affirmativeBg} testID="speak-affirmative" />
             </View>
 
@@ -229,6 +249,9 @@ export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
                   </View>
                   <SentenceText sentence={cards.negative} color={colors.negative} small />
                 </View>
+                {titaRef && refCards ? (
+                  <Text style={styles.refSentenceSm} testID="ref-negative">{refCards.negative.full}</Text>
+                ) : null}
                 <SpeakButton onPress={() => speak(cards.negative.full)} color={colors.negative} bg={colors.negativeBg} testID="speak-negative" />
               </View>
 
@@ -242,6 +265,9 @@ export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
                   </View>
                   <SentenceText sentence={cards.question} color={colors.question} small />
                 </View>
+                {titaRef && refCards ? (
+                  <Text style={styles.refSentenceSm} testID="ref-question">{refCards.question.full}</Text>
+                ) : null}
                 <SpeakButton onPress={() => speak(cards.question.full)} color={colors.question} bg={colors.questionBg} testID="speak-question" />
               </View>
             </View>
@@ -331,6 +357,12 @@ const styles = StyleSheet.create({
   cardHalf: { flex: 1 },
   sentence: { fontFamily: fonts.bold, fontSize: 20, color: colors.ink, textAlign: "center", marginTop: spacing.sm },
   sentenceSm: { fontFamily: fonts.bold, fontSize: 15, color: colors.ink, flexShrink: 1 },
+  refSentence: { fontFamily: fonts.semibold, fontSize: 15, fontStyle: "italic", color: colors.inkSoft, textAlign: "center", marginTop: 4 },
+  refSentenceSm: { fontFamily: fonts.semibold, fontSize: 12, fontStyle: "italic", color: colors.inkSoft, marginTop: 6 },
+  mixedChip: { flexDirection: "row", alignItems: "center", alignSelf: "center", gap: 8, backgroundColor: colors.card, paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.pill, marginBottom: spacing.md, ...shadow },
+  mixedChipText: { fontFamily: fonts.extrabold, fontSize: 11, letterSpacing: 0.5, color: colors.primary },
+  mixedDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: colors.inkSoft },
+  mixedDir: { fontFamily: fonts.bold, fontSize: 11, letterSpacing: 0.5, color: colors.inkSoft },
   tag: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: radius.pill },
   tagText: { fontFamily: fonts.extrabold, fontSize: 10, letterSpacing: 0.5 },
   speakBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", marginTop: spacing.md, alignSelf: "center" },
