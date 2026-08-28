@@ -44,17 +44,11 @@ export default function Modules() {
     setMenuOpen(false);
   };
 
-  const pickMixed = () => {
-    if (mixed) {
-      // already in mixed: flip the primary language (flips direction)
-      setLang(lang === "en" ? "es" : "en");
-    } else {
-      setMixed(true);
-    }
+  const pickMixed = (l: LearnLang) => {
+    setLang(l);
+    setMixed(true);
     setMenuOpen(false);
   };
-
-  const mixedDir = lang === "en" ? "EN → ES" : "ES → EN";
 
   return (
     <LinearGradient colors={[colors.bgTop, colors.bgBottom]} style={styles.flex}>
@@ -116,24 +110,29 @@ export default function Modules() {
           <View style={[styles.menuCard, { top: insets.top + 58 }]}>
             <Text style={styles.menuTitle}>{t.languageMenu}</Text>
             <Pressable testID="lang-english" style={styles.menuItem} onPress={() => pickLang("en")}>
-              <Text style={styles.menuFlag}>🇬🇧</Text>
+              <View style={styles.codeBadge}><Text style={styles.codeBadgeText}>EN</Text></View>
               <Text style={styles.menuItemText}>{t.langEnglish}</Text>
               {!mixed && lang === "en" ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
             </Pressable>
             <View style={styles.menuDivider} />
             <Pressable testID="lang-spanish" style={styles.menuItem} onPress={() => pickLang("es")}>
-              <Text style={styles.menuFlag}>🇪🇸</Text>
+              <View style={styles.codeBadge}><Text style={styles.codeBadgeText}>ES</Text></View>
               <Text style={styles.menuItemText}>{t.langSpanish}</Text>
               {!mixed && lang === "es" ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
             </Pressable>
+
             <View style={styles.menuDivider} />
-            <Pressable testID="lang-mixed" style={styles.menuItem} onPress={pickMixed}>
-              <Text style={styles.menuFlag}>🌎</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.menuItemText}>{t.langMixed}</Text>
-                {mixed ? <Text style={styles.menuSub}>{mixedDir}</Text> : null}
-              </View>
-              {mixed ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
+            <Text style={styles.menuSection}>🌎 {t.langMixed}</Text>
+            <Pressable testID="lang-mixed-en-es" style={styles.menuItem} onPress={() => pickMixed("en")}>
+              <View style={styles.codeBadge}><Text style={styles.codeBadgeText}>EN→ES</Text></View>
+              <Text style={styles.menuItemText}>{t.mixedEnEs}</Text>
+              {mixed && lang === "en" ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
+            </Pressable>
+            <View style={styles.menuDivider} />
+            <Pressable testID="lang-mixed-es-en" style={styles.menuItem} onPress={() => pickMixed("es")}>
+              <View style={styles.codeBadge}><Text style={styles.codeBadgeText}>ES→EN</Text></View>
+              <Text style={styles.menuItemText}>{t.mixedEsEn}</Text>
+              {mixed && lang === "es" ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
             </Pressable>
           </View>
         </Pressable>
@@ -172,14 +171,20 @@ const styles = StyleSheet.create({
   badgeText: { fontFamily: fonts.bold, fontSize: 11, color: "#fff" },
   menuBackdrop: { flex: 1, backgroundColor: "rgba(20,22,40,0.25)" },
   menuCard: {
-    position: "absolute", left: spacing.md, width: 240,
+    position: "absolute", left: spacing.md, width: 264,
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.sm,
     shadowColor: "#2A2E45", shadowOpacity: 0.2, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 8,
   },
   menuTitle: { fontFamily: fonts.extrabold, fontSize: 13, color: colors.inkSoft, paddingHorizontal: 10, paddingTop: 6, paddingBottom: 8 },
+  menuSection: { fontFamily: fonts.extrabold, fontSize: 12, color: colors.inkSoft, paddingHorizontal: 10, paddingTop: 8, paddingBottom: 2, letterSpacing: 0.3 },
   menuItem: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12, paddingHorizontal: 10, borderRadius: radius.md },
+  codeBadge: {
+    minWidth: 30, paddingHorizontal: 6, height: 24, borderRadius: 7,
+    backgroundColor: "#EEF2FE", alignItems: "center", justifyContent: "center",
+  },
+  codeBadgeText: { fontFamily: fonts.extrabold, fontSize: 11, letterSpacing: 0.5, color: colors.primary },
   menuFlag: { fontSize: 20 },
-  menuItemText: { flex: 1, fontFamily: fonts.bold, fontSize: 16, color: colors.ink },
+  menuItemText: { flex: 1, fontFamily: fonts.bold, fontSize: 15, color: colors.ink },
   menuSub: { fontFamily: fonts.bold, fontSize: 12, color: colors.primary, marginTop: 1 },
   menuDivider: { height: 1, backgroundColor: colors.border, marginHorizontal: 10 },
 });
