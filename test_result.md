@@ -101,3 +101,60 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Grammar/language learning app (EN/ES/Mixed). Deployment readiness check requested. During the check, backend .env and frontend .env files were found missing (lost on environment rehydration), causing backend to crash with KeyError: 'MONGO_URL'. Restored both .env files."
+
+backend:
+  - task: "Backend boots and serves API after restoring .env (MONGO_URL, DB_NAME, EMERGENT_LLM_KEY)"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Recreated backend/.env with MONGO_URL=mongodb://localhost:27017, DB_NAME=test_database, EMERGENT_LLM_KEY. Backend now returns 200 on GET /api/. Needs verification of GET /api/ and GET /api/tts (OpenAI TTS via emergentintegrations, returns audio/mpeg)."
+        - working: true
+          agent: "testing"
+          comment: "Verified via external ingress: GET /api/ returns 200 with correct JSON. 5/5 tests passed."
+        - working: true
+          agent: "testing"
+          comment: "✅ VERIFIED: GET /api/ returns HTTP 200 with correct JSON response {'message': 'Grammar app API'}. Backend is accessible via external ingress URL (https://mobile-app-preview-671.preview.emergentagent.com/api). Server logs confirm successful startup after .env restoration. No errors in backend logs."
+
+  - task: "TTS endpoint GET /api/tts returns mp3 audio"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Uses EMERGENT_LLM_KEY with OpenAITextToSpeech (model tts-1, voice nova, mp3). Verify it returns 200 with content-type audio/mpeg for a sample text like 'I can cut.' and caches repeats."
+        - working: true
+          agent: "testing"
+          comment: "EN phrase: 200 audio/mpeg 10368 bytes; ES phrase: 200 audio/mpeg 16128 bytes; caching OK; empty text -> 422. 5/5 passed."
+        - working: true
+          agent: "testing"
+          comment: "✅ VERIFIED: All TTS tests passed. (1) English phrase 'I can cut.' returns HTTP 200, content-type audio/mpeg, 10368 bytes. (2) Repeat request returns HTTP 200 with same audio (caching works). (3) Spanish phrase 'Yo puedo cortar.' returns HTTP 200, audio/mpeg, 16128 bytes. (4) Empty text validation works correctly: returns HTTP 422 with proper error message (not 500). OpenAI TTS integration via emergentintegrations library is working correctly with EMERGENT_LLM_KEY."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.1"
+  test_sequence: 2
+  run_ui: false
+
+test_plan:
+  current_focus: []
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "main"
+      message: "Restored missing .env files that caused backend crash. Please test backend only: (1) GET /api/ returns {\"message\":\"Grammar app API\"}; (2) GET /api/tts?text=I%20can%20cut. returns HTTP 200 with content-type audio/mpeg and non-empty body; (3) repeat same request to confirm caching still returns 200. Backend base URL is the external ingress with /api prefix."
+    - agent: "testing"
+      message: "✅ Backend testing complete. All 5 test cases passed: (1) Root endpoint returns correct JSON, (2) English TTS returns audio/mpeg with 10368 bytes, (3) Caching works - repeat request successful, (4) Spanish TTS works correctly with 16128 bytes, (5) Empty text validation returns 422 error as expected. OpenAI TTS integration via emergentintegrations is working correctly. Backend is fully functional and ready for deployment."
