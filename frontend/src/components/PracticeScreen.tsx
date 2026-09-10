@@ -24,7 +24,7 @@ import { Sentence } from "@/src/data/verbs";
 import { MixedReference } from "@/src/data/bilingual";
 import { STRINGS } from "@/src/i18n";
 
-const BACKEND = process.env.EXPO_PUBLIC_BACKEND_URL;
+const BACKEND = process.env.EXPO_PUBLIC_BACKEND_URL || "[https://dummy.api](https://dummy.api)";
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 type UIT = (typeof STRINGS)["en"];

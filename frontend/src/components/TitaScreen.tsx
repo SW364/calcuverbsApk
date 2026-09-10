@@ -25,7 +25,7 @@ import { makeTitaReference } from "@/src/data/bilingual";
 import { useLanguage } from "@/src/context/LanguageContext";
 import { STRINGS, uiLangOf, MODULE_TITLES } from "@/src/i18n";
 
-const BACKEND = process.env.EXPO_PUBLIC_BACKEND_URL;
+const BACKEND = process.env.EXPO_PUBLIC_BACKEND_URL || "[https://dummy.api](https://dummy.api)";
 
 type QtyT = { key: number; label: string };
 type ColorT = { name: string; hex: string };

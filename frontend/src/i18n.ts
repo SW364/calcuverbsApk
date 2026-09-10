@@ -90,7 +90,7 @@ export const STRINGS: Record<"en" | "es", UIStrings> = {
 export const MODULE_TITLES: Record<LearnLang, Record<string, string>> = {
   en: {
     "M1.A": "Verbos Básicos",
-    "M1.B": "Gerundio (be + -ing)",
+    "M1.B": "Tiempos continuos",
     "M2.A": "Tiempos verbales",
     "M2.B": "Tiempos continuos",
     "M3.A": "Verbos regulares",
@@ -100,7 +100,7 @@ export const MODULE_TITLES: Record<LearnLang, Record<string, string>> = {
   },
   es: {
     "M1.A": "Basic verbs",
-    "M1.B": "Gerund (estar + -ndo)",
+    "M1.B": "Continuous tenses",
     "M2.A": "Verb tenses",
     "M2.B": "Continuous tenses",
     "M3.A": "Regular verbs",
