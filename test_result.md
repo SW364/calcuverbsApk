@@ -121,7 +121,7 @@ backend:
           comment: "Verified via external ingress: GET /api/ returns 200 with correct JSON. 5/5 tests passed."
         - working: true
           agent: "testing"
-          comment: "✅ VERIFIED: GET /api/ returns HTTP 200 with correct JSON response {'message': 'Grammar app API'}. Backend is accessible via external ingress URL (https://mobile-app-preview-671.preview.emergentagent.com/api). Server logs confirm successful startup after .env restoration. No errors in backend logs."
+          comment: "✅ VERIFIED: GET /api/ returns HTTP 200 with correct JSON response {'message': 'Grammar app API'}. Backend is accessible via external ingress URL (https://youthful-darwin-12.preview.emergentagent.com/api). Server logs confirm successful startup after .env restoration. No errors in backend logs."
 
   - task: "TTS endpoint GET /api/tts returns mp3 audio"
     implemented: true
