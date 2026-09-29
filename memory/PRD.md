@@ -58,3 +58,13 @@ Estudiante hispanohablante aprendiendo estructura de frases en inglés con verbo
   - M3.A `/m3a`: 4 tiempos, 58 verbos regulares (lista_verbos_directa).
   - M4.A `/m4a`: 4 tiempos, 42 verbos irregulares con formas explícitas (lista_verbos_segundo). Ej: "I have awoken".
 - M3.B y M4.B siguen como "Próximamente" (según instrucción del usuario).
+
+## Branding / Identidad de la app (2026-09-29)
+- name: `CalcuVerbs-Bilingual` · iOS bundleIdentifier y android.package: `com.calcuverbs.bilingual` (ya estaban correctos en app.json).
+- Reemplazado el logo de Emergent por el logo "Calcuverbs bilingual" en:
+  - `assets/images/icon.png` (1024x1024)
+  - `assets/images/adaptive-icon.png` (1024x1024, android backgroundColor `#F4F5F9`)
+  - `assets/images/splash-image.png` (1024x1024, imageWidth 220, backgroundColor `#F4F5F9`)
+  - `assets/images/favicon.png` (256x256)
+- app.json: fondo del splash y adaptiveIcon cambiado de `#000000` a `#F4F5F9`.
+- Nota: ícono/splash nativos solo se ven al generar un build nuevo (no en Expo Go ni preview web).

@@ -15,7 +15,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#F4F5F9"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.calcuverbs.bilingual",
@@ -35,9 +35,9 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-image.png",
-          "imageWidth": 200,
+          "imageWidth": 220,
           "resizeMode": "contain",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#F4F5F9"
         }
       ],
       "expo-audio",
