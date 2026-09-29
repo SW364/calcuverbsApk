@@ -9,6 +9,8 @@ import {
   TextInput,
   FlatList,
 } from "react-native";
+import * as Speech from "expo-speech";
+import { useLanguage } from "@/src/context/LanguageContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -127,6 +129,7 @@ export default function PracticeScreen(cfg: PracticeConfig) {
   const [search, setSearch] = useState("");
   const [cards, setCards] = useState<Trio | null>(null);
   const [refCards, setRefCards] = useState<Trio | null>(null);
+  const { lang } = useLanguage();
 
   const player = useAudioPlayer(null);
 
@@ -158,14 +161,15 @@ export default function PracticeScreen(cfg: PracticeConfig) {
   }, [cfg, subj, opt, verb]);
 
   const speak = useCallback(
-    (text: string) => {
-      const uri = `${BACKEND}/api/tts?text=${encodeURIComponent(text)}`;
-      player.replace({ uri });
-      player.seekTo(0);
-      player.play();
-    },
-    [player],
-  );
+  (text: string) => {
+    Speech.stop(); // corta cualquier audio en curso
+    Speech.speak(text, {
+      language: lang === "es" ? "es-ES" : "en-US",
+      rate: 0.9, // un poco más lento, ideal para aprender
+    });
+  },
+  [lang],
+);
 
   const base = cfg.divided
     ? verbTab === "regular"

@@ -7,6 +7,8 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
+
+import * as Speech from "expo-speech";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -110,14 +112,15 @@ export default function TitaScreen({ tense }: { tense: "present" | "past" }) {
   }, [build, tense, QTY, COLS, qty, color, objKey, mixed, lang]);
 
   const speak = useCallback(
-    (text: string) => {
-      const uri = `${BACKEND}/api/tts?text=${encodeURIComponent(text)}`;
-      player.replace({ uri });
-      player.seekTo(0);
-      player.play();
-    },
-    [player],
-  );
+  (text: string) => {
+    Speech.stop();
+    Speech.speak(text, {
+      language: lang === "es" ? "es-ES" : "en-US",
+      rate: 0.9,
+    });
+  },
+  [lang],
+);
 
   const selectedObj = OBJS.find((o) => o.key === objKey)!;
   const catObjects = OBJS.filter((o) => o.category === cat);
